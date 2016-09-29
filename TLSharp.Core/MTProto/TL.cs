@@ -966,10 +966,10 @@ namespace TLSharp.Core.MTProto
             return new MessageEmptyConstructor(id);
         }
 
-        public static Message message(int id, int from_id, int to_id, bool output, bool unread, int date, string message,
+        public static Message message(int flags, int id, int from_id, Peer to_id, int date, string message,
             MessageMedia media)
         {
-            return new MessageConstructor(id, from_id, to_id, output, unread, date, message, media);
+            return new MessageConstructor(flags, id, from_id, to_id, date, message, media);
         }
 
         public static Message messageForwarded(int id, int fwd_from_id, int fwd_date, int from_id, int to_id, bool output,
@@ -5289,11 +5289,10 @@ namespace TLSharp.Core.MTProto
 
     public class MessageConstructor : Message
     {
+        public int flags;
         public int id;
         public int from_id;
-        public int to_id;
-        public bool output;
-        public bool unread;
+        public Peer to_id;
         public int date;
         public string message;
         public MessageMedia media;
@@ -5303,14 +5302,12 @@ namespace TLSharp.Core.MTProto
 
         }
 
-        public MessageConstructor(int id, int from_id, int to_id, bool output, bool unread, int date, string message,
-            MessageMedia media)
+        public MessageConstructor(int flags, int id, int from_id, Peer to_id, int date, string message, MessageMedia media)
         {
+            this.flags = flags;
             this.id = id;
             this.from_id = from_id;
             this.to_id = to_id;
-            this.output = output;
-            this.unread = unread;
             this.date = date;
             this.message = message;
             this.media = media;
@@ -5324,12 +5321,11 @@ namespace TLSharp.Core.MTProto
 
         public override void Write(BinaryWriter writer)
         {
-            writer.Write(0x22eb6aba);
+            writer.Write(0x567699b3);
+            writer.Write(this.flags);
             writer.Write(this.id);
             writer.Write(this.from_id);
-            writer.Write(this.to_id);
-            writer.Write(this.output ? 0x997275b5 : 0xbc799737);
-            writer.Write(this.unread ? 0x997275b5 : 0xbc799737);
+            this.to_id.Write(writer);
             writer.Write(this.date);
             Serializers.String.write(writer, this.message);
             this.media.Write(writer);
@@ -5337,11 +5333,10 @@ namespace TLSharp.Core.MTProto
 
         public override void Read(BinaryReader reader)
         {
+            this.flags = reader.ReadInt32();
             this.id = reader.ReadInt32();
             this.from_id = reader.ReadInt32();
-            this.to_id = reader.ReadInt32();
-            this.output = reader.ReadUInt32() == 0x997275b5;
-            this.unread = reader.ReadUInt32() == 0x997275b5;
+            this.to_id = TL.Parse<Peer>(reader);
             this.date = reader.ReadInt32();
             this.message = Serializers.String.read(reader);
             this.media = TL.Parse<MessageMedia>(reader);
@@ -5349,8 +5344,8 @@ namespace TLSharp.Core.MTProto
 
         public override string ToString()
         {
-            return String.Format("(message id:{0} from_id:{1} to_id:{2} out:{3} unread:{4} date:{5} message:'{6}' media:{7})", id,
-                from_id, to_id, output, unread, date, message, media);
+            return String.Format("(message flags: {0} id:{1} from_id:{2} to_id:{3} date:{4} message:'{5}' media:{6})", 
+                flags, id, from_id, to_id, date, message, media);
         }
     }
 
@@ -5996,13 +5991,17 @@ namespace TLSharp.Core.MTProto
         public IList<User> Users { get; set; }
     }
 
-    public class MessageDialogs
+    public class MessageHistory
     {
-        public int? Count { get; set; }
-        public List<Dialog> Dialogs { get; set; }
         public List<Message> Messages { get; set; }
         public List<Chat> Chats { get; set; }
         public List<User> Users { get; set; }
+    }
+
+    public class MessageDialogs : MessageHistory
+    {
+        public int? Count { get; set; }
+        public List<Dialog> Dialogs { get; set; }
     }
 
     public class DialogConstructor : Dialog
