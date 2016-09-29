@@ -46,7 +46,6 @@ namespace TLSharp.Core.Requests
             for (var i = 0; i < messages_len; i++)
             {
                 var msgEl = TL.Parse<Message>(reader);
-
                 messages.Add(msgEl);
             }
 
@@ -55,16 +54,20 @@ namespace TLSharp.Core.Requests
             int chats_len = reader.ReadInt32();
             chats = new List<Chat>(chats_len);
             for (int i = 0; i < chats_len; i++)
-                chats.Add(TL.Parse<Chat>(reader));
+            {
+                var chatEl = TL.Parse<Chat>(reader);
+                chats.Add(chatEl);
+            }
 
-            /*
-			// users
+            // users
 			reader.ReadUInt32();
 			int users_len = reader.ReadInt32();
 			users = new List<User>(users_len);
-			for (int i = 0; i < users_len; i++)
-				users.Add(TL.Parse<User>(reader));
-			*/
+            for (int i = 0; i < users_len; i++)
+            {
+                var userEl = TL.Parse<User>(reader);
+                users.Add(userEl);
+            }
         }
 
         public override void OnException(Exception exception)

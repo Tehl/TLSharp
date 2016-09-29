@@ -248,13 +248,18 @@ namespace TLSharp.Core
             await _sender.Receive(request);
         }
 
-        public async Task<List<Message>> GetMessagesHistoryForContact(int user_id, int offset, int limit, int max_id = -1)
+        public async Task<MessageHistory> GetMessagesHistoryForContact(int user_id, int offset, int limit, int max_id = -1)
         {
             var request = new GetHistoryRequest(new InputPeerContactConstructor(user_id), offset, max_id, limit);
             await _sender.Send(request);
             await _sender.Receive(request);
 
-            return request.messages;
+            return new MessageHistory
+            {
+                Messages = request.messages,
+                Chats = request.chats,
+                Users = request.users
+            };
         }
 
         public async Task<Tuple<storage_FileType, byte[]>> GetFile(long volume_id, int local_id, long secret, int offset, int limit)
