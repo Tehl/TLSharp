@@ -278,7 +278,10 @@ namespace TLSharp.Core.MTProto
         documentAttributeSticker,
         documentAttributeVideo,
         documentAttributeAudio,
-        documentAttributeFilename
+        documentAttributeFilename,
+        userStatusRecently,
+        userStatusLastWeek,
+        userStatusLastMonth
     }
 
     public class TL
@@ -551,7 +554,10 @@ namespace TLSharp.Core.MTProto
             {0xfb0a5727, typeof (DocumentAttributeStickerConstructor)},
             {0x5910cccb, typeof (DocumentAttributeVideoConstructor)},
             {0x51448e5, typeof (DocumentAttributeAudioConstructor)},
-            {0x15590068, typeof (DocumentAttributeFilenameConstructor)}
+            {0x15590068, typeof (DocumentAttributeFilenameConstructor)},
+            {0xe26f42f1, typeof (UserStatusRecentlyConstructor)},
+            {0x7bf09fc, typeof (UserStatusLastWeekConstructor)},
+            {0x77ebc742 , typeof (UserStatusLastMonthConstructor)}
         };
 
         public static TLObject Parse(BinaryReader reader, uint code)
@@ -1973,6 +1979,21 @@ namespace TLSharp.Core.MTProto
         public static DocumentAttribute documentAttributeFilename(string file_name)
         {
             return new DocumentAttributeFilenameConstructor(file_name);
+        }
+
+        public static UserStatus userStatusRecently()
+        {
+            return new UserStatusRecentlyConstructor();
+        }
+
+        public static UserStatus userStatusLastWeek()
+        {
+            return new UserStatusLastWeekConstructor();
+        }
+
+        public static UserStatus userStatusLastMonth()
+        {
+            return new UserStatusLastMonthConstructor();
         }
     }
 
@@ -15096,6 +15117,54 @@ namespace TLSharp.Core.MTProto
         public override void Read(BinaryReader reader)
         {
             this.file_name = reader.ReadString();
+        }
+    }
+
+    public class UserStatusRecentlyConstructor : UserStatus
+    {
+        public override Constructor Constructor
+        {
+            get { return Constructor.userStatusRecently; }
+        }
+        public override void Write(BinaryWriter writer)
+        {
+            writer.Write(0xe26f42f1);
+        }
+
+        public override void Read(BinaryReader reader)
+        {
+        }
+    }
+
+    public class UserStatusLastWeekConstructor : UserStatus
+    {
+        public override Constructor Constructor
+        {
+            get { return Constructor.userStatusLastWeek; }
+        }
+        public override void Write(BinaryWriter writer)
+        {
+            writer.Write(0x7bf09fc);
+        }
+
+        public override void Read(BinaryReader reader)
+        {
+        }
+    }
+
+    public class UserStatusLastMonthConstructor : UserStatus
+    {
+        public override Constructor Constructor
+        {
+            get { return Constructor.userStatusLastMonth; }
+        }
+        public override void Write(BinaryWriter writer)
+        {
+            writer.Write(0x77ebc742);
+        }
+
+        public override void Read(BinaryReader reader)
+        {
         }
     }
 }
