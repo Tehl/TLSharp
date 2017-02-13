@@ -15116,7 +15116,6 @@ namespace TLSharp.Core.MTProto
 
         public override void Read(BinaryReader reader)
         {
-            this.file_name = reader.ReadString();
         }
     }
 
